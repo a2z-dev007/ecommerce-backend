@@ -3,7 +3,7 @@ import { AppError } from '../../common/middlewares/error.middleware';
 import { HTTP_STATUS } from '../../common/constants';
 
 export class SettingsService {
-  public static async getSettings(): Promise<ISettings> {
+  public static async getSettings(): Promise<any> {
     let settings = await Settings.findOne();
     
     if (!settings) {
@@ -190,7 +190,7 @@ export class SettingsService {
     return settings;
   }
 
-  private static async createDefaultSettings(): Promise<ISettings> {
+  private static async createDefaultSettings(): Promise<any> {
     const defaultSettings = new Settings({
       businessName: 'My Ecommerce Store',
       currency: 'USD',

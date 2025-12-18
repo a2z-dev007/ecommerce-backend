@@ -1,8 +1,9 @@
 import jwt from 'jsonwebtoken';
+import { Types } from 'mongoose';
 import { env } from './env';
 
 export interface JWTPayload {
-  userId: string;
+  userId: string | Types.ObjectId;
   email: string;
   role: string;
   tokenType: 'access' | 'refresh';
@@ -11,17 +12,17 @@ export interface JWTPayload {
 export class JWTService {
   public static generateAccessToken(payload: Omit<JWTPayload, 'tokenType'>): string {
     return jwt.sign(
-      { ...payload, tokenType: 'access' },
+      { ...payload, tokenType: 'access' as const },
       env.JWT_ACCESS_SECRET,
-      { expiresIn: env.JWT_ACCESS_EXPIRES_IN }
+      { expiresIn: env.JWT_ACCESS_EXPIRES_IN } as jwt.SignOptions
     );
   }
 
   public static generateRefreshToken(payload: Omit<JWTPayload, 'tokenType'>): string {
     return jwt.sign(
-      { ...payload, tokenType: 'refresh' },
+      { ...payload, tokenType: 'refresh' as const },
       env.JWT_REFRESH_SECRET,
-      { expiresIn: env.JWT_REFRESH_EXPIRES_IN }
+      { expiresIn: env.JWT_REFRESH_EXPIRES_IN } as jwt.SignOptions
     );
   }
 

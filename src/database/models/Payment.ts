@@ -27,7 +27,7 @@ export interface IPayment extends Document {
 
 const paymentSchema = new Schema<IPayment>({
   order: {
-    type: Schema.Types.ObjectId,
+    type: Schema.Types.ObjectId as any,
     ref: 'Order',
     required: true,
   },

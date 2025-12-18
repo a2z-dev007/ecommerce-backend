@@ -22,7 +22,7 @@ export interface ICart extends Document {
 
 const cartItemSchema = new Schema<ICartItem>({
   product: {
-    type: Schema.Types.ObjectId,
+    type: Schema.Types.ObjectId as any,
     ref: 'Product',
     required: true,
   },
@@ -47,7 +47,7 @@ const cartItemSchema = new Schema<ICartItem>({
 
 const cartSchema = new Schema<ICart>({
   user: {
-    type: Schema.Types.ObjectId,
+    type: Schema.Types.ObjectId as any,
     ref: 'User',
   },
   sessionId: {
@@ -79,7 +79,7 @@ cartSchema.index({ sessionId: 1 });
 cartSchema.index({ expiresAt: 1 });
 
 // Ensure either user or sessionId is provided
-cartSchema.pre('save', function(next) {
+cartSchema.pre('save', function(this: ICart, next) {
   if (!this.user && !this.sessionId) {
     return next(new Error('Either user or sessionId must be provided'));
   }
@@ -87,7 +87,7 @@ cartSchema.pre('save', function(next) {
 });
 
 // Calculate subtotal and item count before saving
-cartSchema.pre('save', function(next) {
+cartSchema.pre('save', function(this: ICart, next) {
   this.subtotal = this.items.reduce((total, item) => total + (item.price * item.quantity), 0);
   this.itemCount = this.items.reduce((total, item) => total + item.quantity, 0);
   next();

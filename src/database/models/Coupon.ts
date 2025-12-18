@@ -82,19 +82,19 @@ const couponSchema = new Schema<ICoupon>({
   startsAt: Date,
   expiresAt: Date,
   applicableCategories: [{
-    type: Schema.Types.ObjectId,
+    type: Schema.Types.ObjectId as any,
     ref: 'Category',
   }],
   applicableProducts: [{
-    type: Schema.Types.ObjectId,
+    type: Schema.Types.ObjectId as any,
     ref: 'Product',
   }],
   excludedCategories: [{
-    type: Schema.Types.ObjectId,
+    type: Schema.Types.ObjectId as any,
     ref: 'Category',
   }],
   excludedProducts: [{
-    type: Schema.Types.ObjectId,
+    type: Schema.Types.ObjectId as any,
     ref: 'Product',
   }],
 }, {

@@ -5,6 +5,7 @@ import { SlugUtils } from '../../common/utils';
 
 export interface CreateCategoryData {
   name: string;
+  slug?: string;
   description?: string;
   image?: string;
   parentCategory?: string;
@@ -168,7 +169,7 @@ export class CategoriesService {
       },
     }));
 
-    await Category.bulkWrite(bulkOps);
+    await Category.bulkWrite(bulkOps as any);
   }
 
   public static async getCategoryStats() {

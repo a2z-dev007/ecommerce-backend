@@ -25,7 +25,7 @@ export const authenticate = (
     const decoded = JWTService.verifyAccessToken(token);
     
     req.user = {
-      userId: decoded.userId,
+      userId: decoded.userId.toString(),
       email: decoded.email,
       role: decoded.role,
     };
@@ -54,7 +54,7 @@ export const optionalAuth = (
       if (token) {
         const decoded = JWTService.verifyAccessToken(token);
         req.user = {
-          userId: decoded.userId,
+          userId: decoded.userId.toString(),
           email: decoded.email,
           role: decoded.role,
         };

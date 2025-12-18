@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs';
-import { env } from '../config/env';
-import { ApiResponse, PaginationInfo } from './types';
+import { env } from '../../config/env';
+import { ApiResponse, PaginationInfo } from '../types';
 
 export class PasswordUtils {
   public static async hash(password: string): Promise<string> {

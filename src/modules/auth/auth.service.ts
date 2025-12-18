@@ -48,7 +48,7 @@ export class AuthService {
 
     // Generate tokens
     const { accessToken, refreshToken } = JWTService.generateTokenPair({
-      userId: user._id,
+      userId: user._id.toString(),
       email: user.email,
       role: user.role,
     });
@@ -58,8 +58,11 @@ export class AuthService {
     user.refreshTokens.push(hashedRefreshToken);
     await user.save();
 
+    const userObj = user.toObject();
+    delete userObj.password;
+
     return {
-      user: user.toJSON(),
+      user: userObj,
       accessToken,
       refreshToken,
     };
@@ -85,7 +88,7 @@ export class AuthService {
 
     // Generate tokens
     const { accessToken, refreshToken } = JWTService.generateTokenPair({
-      userId: user._id,
+      userId: user._id.toString(),
       email: user.email,
       role: user.role,
     });
@@ -96,8 +99,11 @@ export class AuthService {
     user.lastLoginAt = new Date();
     await user.save();
 
+    const userObj = user.toObject();
+    delete userObj.password;
+
     return {
-      user: user.toJSON(),
+      user: userObj,
       accessToken,
       refreshToken,
     };
@@ -125,7 +131,7 @@ export class AuthService {
 
       // Generate new tokens
       const tokens = JWTService.generateTokenPair({
-        userId: user._id,
+        userId: user._id.toString(),
         email: user.email,
         role: user.role,
       });

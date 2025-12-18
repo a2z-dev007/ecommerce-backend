@@ -24,17 +24,17 @@ export interface IReview extends Document {
 
 const reviewSchema = new Schema<IReview>({
   product: {
-    type: Schema.Types.ObjectId,
+    type: Schema.Types.ObjectId as any,
     ref: 'Product',
     required: true,
   },
   user: {
-    type: Schema.Types.ObjectId,
+    type: Schema.Types.ObjectId as any,
     ref: 'User',
     required: true,
   },
   order: {
-    type: Schema.Types.ObjectId,
+    type: Schema.Types.ObjectId as any,
     ref: 'Order',
   },
   rating: {
@@ -79,7 +79,7 @@ const reviewSchema = new Schema<IReview>({
       maxlength: 500,
     },
     respondedBy: {
-      type: Schema.Types.ObjectId,
+      type: Schema.Types.ObjectId as any,
       ref: 'User',
     },
     respondedAt: Date,

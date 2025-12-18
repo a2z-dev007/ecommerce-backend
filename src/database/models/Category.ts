@@ -43,7 +43,7 @@ const categorySchema = new Schema<ICategory>({
     trim: true,
   },
   parentCategory: {
-    type: Schema.Types.ObjectId,
+    type: Schema.Types.ObjectId as any,
     ref: 'Category',
     default: null,
   },

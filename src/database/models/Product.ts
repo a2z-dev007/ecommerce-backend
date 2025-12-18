@@ -153,12 +153,12 @@ const productSchema = new Schema<IProduct>({
     maxlength: 300,
   },
   category: {
-    type: Schema.Types.ObjectId,
+    type: Schema.Types.ObjectId as any,
     ref: 'Category',
     required: true,
   },
   subcategories: [{
-    type: Schema.Types.ObjectId,
+    type: Schema.Types.ObjectId as any,
     ref: 'Category',
   }],
   tags: [String],

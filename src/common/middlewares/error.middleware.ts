@@ -23,8 +23,8 @@ export const errorHandler = (
   res: Response,
   next: NextFunction
 ): void => {
-  let statusCode = HTTP_STATUS.INTERNAL_SERVER_ERROR;
-  let message = MESSAGES.INTERNAL_ERROR;
+  let statusCode: number = HTTP_STATUS.INTERNAL_SERVER_ERROR;
+  let message: string = MESSAGES.INTERNAL_ERROR;
   let errors: any = undefined;
 
   // Handle different error types

@@ -64,12 +64,12 @@ const cmsPageSchema = new Schema<ICmsPage>({
     },
   },
   createdBy: {
-    type: Schema.Types.ObjectId,
+    type: Schema.Types.ObjectId as any,
     ref: 'User',
     required: true,
   },
   updatedBy: {
-    type: Schema.Types.ObjectId,
+    type: Schema.Types.ObjectId as any,
     ref: 'User',
   },
 }, {

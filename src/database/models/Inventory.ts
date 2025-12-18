@@ -18,7 +18,7 @@ export interface IInventoryTransaction extends Document {
 
 const inventoryTransactionSchema = new Schema<IInventoryTransaction>({
   product: {
-    type: Schema.Types.ObjectId,
+    type: Schema.Types.ObjectId as any,
     ref: 'Product',
     required: true,
   },
@@ -53,7 +53,7 @@ const inventoryTransactionSchema = new Schema<IInventoryTransaction>({
     trim: true,
   },
   performedBy: {
-    type: Schema.Types.ObjectId,
+    type: Schema.Types.ObjectId as any,
     ref: 'User',
   },
   notes: {

@@ -6,6 +6,7 @@ import { PaginationQuery, FilterQuery } from '../../common/types';
 
 export interface CreateProductData {
   name: string;
+  slug?: string;
   description: string;
   shortDescription?: string;
   category: string;
@@ -228,7 +229,7 @@ export class ProductsService {
     }
 
     if (variantId) {
-      const variant = product.variants.id(variantId);
+      const variant = (product.variants as any).id(variantId);
       if (!variant) {
         throw new AppError('Product variant not found', HTTP_STATUS.NOT_FOUND);
       }

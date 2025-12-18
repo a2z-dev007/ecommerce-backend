@@ -176,7 +176,7 @@ export class UsersService {
       throw new AppError(MESSAGES.USER_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
     }
 
-    const address = user.addresses.id(addressId);
+    const address = (user.addresses as any).id(addressId);
     if (!address) {
       throw new AppError('Address not found', HTTP_STATUS.NOT_FOUND);
     }
@@ -202,13 +202,13 @@ export class UsersService {
       throw new AppError(MESSAGES.USER_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
     }
 
-    const address = user.addresses.id(addressId);
+    const address = (user.addresses as any).id(addressId);
     if (!address) {
       throw new AppError('Address not found', HTTP_STATUS.NOT_FOUND);
     }
 
     const wasDefault = address.isDefault;
-    user.addresses.pull(addressId);
+    (user.addresses as any).pull(addressId);
 
     // If deleted address was default, make first remaining address default
     if (wasDefault && user.addresses.length > 0) {
