@@ -77,7 +77,7 @@ const cmsPageSchema = new Schema<ICmsPage>({
 });
 
 // Indexes
-cmsPageSchema.index({ slug: 1 });
+// cmsPageSchema.index({ slug: 1 }); // Redundant due to unique: true on slug field
 cmsPageSchema.index({ isPublished: 1 });
 cmsPageSchema.index({ createdAt: -1 });
 

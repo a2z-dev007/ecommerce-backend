@@ -82,7 +82,7 @@ const paymentSchema = new Schema<IPayment>({
 
 // Indexes
 paymentSchema.index({ order: 1 });
-paymentSchema.index({ paymentIntentId: 1 });
+// paymentSchema.index({ paymentIntentId: 1 }); // Redundant due to unique: true on paymentIntentId field
 paymentSchema.index({ status: 1 });
 paymentSchema.index({ method: 1 });
 paymentSchema.index({ createdAt: -1 });

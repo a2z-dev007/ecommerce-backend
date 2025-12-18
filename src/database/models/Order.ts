@@ -232,7 +232,7 @@ const orderSchema = new Schema<IOrder>({
 });
 
 // Indexes
-orderSchema.index({ orderNumber: 1 });
+// orderSchema.index({ orderNumber: 1 }); // Redundant due to unique: true on orderNumber field
 orderSchema.index({ customer: 1 });
 orderSchema.index({ status: 1 });
 orderSchema.index({ paymentStatus: 1 });

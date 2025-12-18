@@ -1,15 +1,15 @@
-import { 
-  database, 
-  User, 
-  Settings, 
-  Category, 
-  Product, 
-  Order, 
-  Cart, 
-  Coupon, 
-  Review, 
-  CmsPage, 
-  InventoryTransaction 
+import {
+  database,
+  User,
+  Settings,
+  Category,
+  Product,
+  Order,
+  Cart,
+  Coupon,
+  Review,
+  CmsPage,
+  InventoryTransaction
 } from './index';
 import { PasswordUtils, SlugUtils } from '../common/utils';
 import { UserRole, OrderStatus, PaymentStatus, PaymentMethod, CouponType, InventoryAction } from '../common/types';
@@ -435,7 +435,10 @@ const seedCategories = async (): Promise<Map<string, any>> => {
     const existingCategories = await Category.countDocuments();
     if (existingCategories > 0) {
       console.log('✅ Categories already exist');
-      return new Map();
+      const categories = await Category.find();
+      const categoryMap = new Map<string, any>();
+      categories.forEach(cat => categoryMap.set(cat.name, cat._id));
+      return categoryMap;
     }
 
     const categoryMap = new Map<string, any>();
@@ -456,7 +459,7 @@ const seedCategories = async (): Promise<Map<string, any>> => {
           metaKeywords: categoryData.name.toLowerCase().replace(/\s+/g, ', ')
         }
       });
-      
+
       const savedCategory = await category.save();
       categoryMap.set(categoryData.name, savedCategory._id);
       categories.push(savedCategory);
@@ -480,7 +483,7 @@ const seedCategories = async (): Promise<Map<string, any>> => {
             metaKeywords: categoryData.name.toLowerCase().replace(/\s+/g, ', ')
           }
         });
-        
+
         const savedCategory = await category.save();
         categoryMap.set(categoryData.name, savedCategory._id);
         categories.push(savedCategory);
@@ -510,7 +513,7 @@ const seedProducts = async (categoryMap: Map<string, any>) => {
       if (!categoryId) continue;
 
       const slug = SlugUtils.generate(productData.name);
-      
+
       const product = new Product({
         name: productData.name,
         slug,
@@ -582,7 +585,7 @@ const seedProducts = async (categoryMap: Map<string, any>) => {
         taxable: true,
         tags: productData.tags,
         seo: {
-          metaTitle: `${productData.name} - ${productData.shortDescription}`,
+          metaTitle: `${productData.name} - ${productData.shortDescription}`.substring(0, 60),
           metaDescription: productData.description.substring(0, 160),
           metaKeywords: productData.tags.join(', ')
         },
@@ -754,7 +757,7 @@ const seedReviews = async (users: any[], products: any[]) => {
     for (let i = 0; i < 25; i++) {
       const user = users[Math.floor(Math.random() * users.length)];
       const product = products[Math.floor(Math.random() * products.length)];
-      
+
       const review = new Review({
         product: product._id,
         user: user._id,
@@ -857,7 +860,7 @@ const seedInventoryTransactions = async (products: any[], adminUser: any) => {
       const action = actions[Math.floor(Math.random() * actions.length)];
       const quantity = Math.floor(Math.random() * 50) + 1;
       const previousStock = Math.floor(Math.random() * 100);
-      
+
       let newStock;
       if (action === InventoryAction.IN) {
         newStock = previousStock + quantity;
@@ -1045,51 +1048,51 @@ const seedSettings = async () => {
 const seedDatabase = async () => {
   try {
     console.log('🌱 Starting comprehensive database seeding...');
-    
+
     // Connect to database
     await database.connect();
-    
+
     // Seed data in order (due to dependencies)
     console.log('👥 Seeding users...');
     await seedUsers();
-    
+
     console.log('📁 Seeding categories...');
     const categoryMap = await seedCategories();
-    
+
     console.log('📦 Seeding products...');
     const products = await seedProducts(categoryMap || new Map());
-    
+
     console.log('🎫 Seeding coupons...');
     await seedCoupons();
-    
+
     console.log('⚙️ Seeding settings...');
     await seedSettings();
-    
+
     // Get users and admin for dependent data
     const users = await User.find({ role: { $ne: UserRole.ADMIN } }).limit(10);
     const adminUser = await User.findOne({ role: UserRole.ADMIN });
-    
+
     if (users.length > 0 && products.length > 0) {
       console.log('🛒 Seeding orders...');
       await seedOrders(users, products);
-      
+
       console.log('⭐ Seeding reviews...');
       await seedReviews(users, products);
-      
+
       console.log('🛍️ Seeding carts...');
       await seedCarts(users, products);
     }
-    
+
     if (adminUser) {
       console.log('📄 Seeding CMS pages...');
       await seedCmsPages(adminUser);
-      
+
       if (products.length > 0) {
         console.log('📊 Seeding inventory transactions...');
         await seedInventoryTransactions(products, adminUser);
       }
     }
-    
+
     console.log('\n🎉 Database seeding completed successfully!');
     console.log('\n📋 Seeded Data Summary:');
     console.log(`👥 Users: ${await User.countDocuments()} (including admin)`);
@@ -1101,14 +1104,14 @@ const seedDatabase = async () => {
     console.log(`🛍️ Carts: ${await Cart.countDocuments()}`);
     console.log(`📄 CMS Pages: ${await CmsPage.countDocuments()}`);
     console.log(`📊 Inventory Transactions: ${await InventoryTransaction.countDocuments()}`);
-    
+
     console.log('\n🔐 Login Credentials:');
     console.log('📧 Admin Email: admin@example.com');
     console.log('🔑 Admin Password: Admin@123');
     console.log('🔑 User Password (all users): Password@123');
-    
+
     console.log('\n🚀 You can now start testing all APIs with realistic data!');
-    
+
     // Disconnect
     await database.disconnect();
     process.exit(0);

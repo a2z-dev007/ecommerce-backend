@@ -102,20 +102,20 @@ const couponSchema = new Schema<ICoupon>({
 });
 
 // Indexes
-couponSchema.index({ code: 1 });
+// couponSchema.index({ code: 1 }); // Redundant due to unique: true on code field
 couponSchema.index({ isActive: 1 });
 couponSchema.index({ expiresAt: 1 });
 couponSchema.index({ startsAt: 1 });
 
 // Virtual to check if coupon is valid
-couponSchema.virtual('isValid').get(function() {
+couponSchema.virtual('isValid').get(function () {
   const now = new Date();
-  
+
   if (!this.isActive) return false;
   if (this.startsAt && now < this.startsAt) return false;
   if (this.expiresAt && now > this.expiresAt) return false;
   if (this.usageLimit && this.usageCount >= this.usageLimit) return false;
-  
+
   return true;
 });
 

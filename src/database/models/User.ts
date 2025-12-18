@@ -178,7 +178,7 @@ const userSchema = new Schema<IUser>({
 }, {
   timestamps: true,
   toJSON: {
-    transform: function(doc: any, ret: any) {
+    transform: function (doc: any, ret: any) {
       delete ret.password;
       delete ret.refreshTokens;
       delete ret.emailVerificationToken;
@@ -190,7 +190,7 @@ const userSchema = new Schema<IUser>({
 });
 
 // Indexes
-userSchema.index({ email: 1 });
+// userSchema.index({ email: 1 }); // Redundant due to unique: true on email field
 userSchema.index({ role: 1 });
 userSchema.index({ isActive: 1 });
 userSchema.index({ createdAt: -1 });

@@ -77,7 +77,7 @@ const categorySchema = new Schema<ICategory>({
 });
 
 // Indexes
-categorySchema.index({ slug: 1 });
+// categorySchema.index({ slug: 1 }); // Redundant due to unique: true on slug field
 categorySchema.index({ parentCategory: 1 });
 categorySchema.index({ isActive: 1 });
 categorySchema.index({ sortOrder: 1 });
