@@ -26,4 +26,10 @@ router.post('/profile/addresses', authenticate, validateSchema(addressSchema), U
 router.put('/profile/addresses/:addressId', authenticate, validateSchema(addressSchema), UsersController.updateAddress);
 router.delete('/profile/addresses/:addressId', authenticate, UsersController.deleteAddress);
 
+// Wishlist routes
+router.get('/profile/wishlist', authenticate, UsersController.getWishlist);
+router.post('/profile/wishlist', authenticate, UsersController.addToWishlist);
+router.delete('/profile/wishlist/:productId', authenticate, UsersController.removeFromWishlist);
+router.delete('/profile/wishlist', authenticate, UsersController.clearWishlist);
+
 export { router as usersRoutes };

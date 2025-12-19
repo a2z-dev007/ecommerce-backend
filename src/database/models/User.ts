@@ -16,6 +16,7 @@ export interface IUser extends Document {
   passwordResetExpires?: Date;
   refreshTokens: string[];
   addresses: IAddress[];
+  wishlist: string[];
   avatar?: string;
   dateOfBirth?: Date;
   gender?: 'male' | 'female' | 'other';
@@ -45,7 +46,7 @@ export interface IAddress {
   isDefault: boolean;
 }
 
-const addressSchema = new Schema<IAddress>({
+const addressSchema = new Schema({
   type: {
     type: String,
     enum: ['billing', 'shipping'],
@@ -154,6 +155,10 @@ const userSchema = new Schema<IUser>({
     type: String,
   }],
   addresses: [addressSchema],
+  wishlist: [{
+    type: Schema.Types.ObjectId as any,
+    ref: 'Product',
+  }],
   avatar: String,
   dateOfBirth: Date,
   gender: {

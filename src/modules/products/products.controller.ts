@@ -92,4 +92,22 @@ export class ProductsController {
       ResponseUtils.success('Product statistics fetched successfully', stats)
     );
   });
+
+  public static bulkUpdateProducts = asyncHandler(async (req: Request, res: Response) => {
+    const { productIds, updateData } = req.body;
+    const count = await ProductsService.bulkUpdateProducts(productIds, updateData);
+    
+    res.status(HTTP_STATUS.OK).json(
+      ResponseUtils.success(`${count} products updated successfully`, { count })
+    );
+  });
+
+  public static bulkDeleteProducts = asyncHandler(async (req: Request, res: Response) => {
+    const { productIds } = req.body;
+    const count = await ProductsService.bulkDeleteProducts(productIds);
+    
+    res.status(HTTP_STATUS.OK).json(
+      ResponseUtils.success(`${count} products deleted successfully`, { count })
+    );
+  });
 }

@@ -101,4 +101,38 @@ export class UsersController {
       ResponseUtils.success('User statistics fetched successfully', stats)
     );
   });
+
+  public static addToWishlist = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const { productId } = req.body;
+    const user = await UsersService.addToWishlist(req.user!.userId, productId);
+    
+    res.status(HTTP_STATUS.OK).json(
+      ResponseUtils.success('Product added to wishlist', user)
+    );
+  });
+
+  public static removeFromWishlist = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const { productId } = req.params;
+    const user = await UsersService.removeFromWishlist(req.user!.userId, productId);
+    
+    res.status(HTTP_STATUS.OK).json(
+      ResponseUtils.success('Product removed from wishlist', user)
+    );
+  });
+
+  public static getWishlist = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const wishlist = await UsersService.getWishlist(req.user!.userId);
+    
+    res.status(HTTP_STATUS.OK).json(
+      ResponseUtils.success(MESSAGES.FETCHED_SUCCESS, wishlist)
+    );
+  });
+
+  public static clearWishlist = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const user = await UsersService.clearWishlist(req.user!.userId);
+    
+    res.status(HTTP_STATUS.OK).json(
+      ResponseUtils.success('Wishlist cleared', user)
+    );
+  });
 }

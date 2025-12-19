@@ -17,5 +17,7 @@ router.get('/admin/stats', authenticate, requireAdminOrStaff, ProductsController
 router.post('/', authenticate, requireAdminOrStaff, ProductsController.createProduct);
 router.put('/:id', authenticate, requireAdminOrStaff, ProductsController.updateProduct);
 router.delete('/:id', authenticate, requireAdminOrStaff, ProductsController.deleteProduct);
+router.put('/bulk/update', authenticate, requireAdminOrStaff, ProductsController.bulkUpdateProducts);
+router.delete('/bulk/delete', authenticate, requireAdminOrStaff, ProductsController.bulkDeleteProducts);
 
 export { router as productsRoutes };

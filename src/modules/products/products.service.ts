@@ -241,6 +241,27 @@ export class ProductsService {
     await product.save();
   }
 
+  public static async bulkUpdateProducts(
+    productIds: string[],
+    updateData: Partial<CreateProductData>
+  ): Promise<number> {
+    const result = await Product.updateMany(
+      { _id: { $in: productIds } },
+      { $set: updateData }
+    );
+
+    return result.modifiedCount;
+  }
+
+  public static async bulkDeleteProducts(productIds: string[]): Promise<number> {
+    const result = await Product.updateMany(
+      { _id: { $in: productIds } },
+      { $set: { isActive: false } }
+    );
+
+    return result.modifiedCount;
+  }
+
   public static async getProductStats() {
     const [
       totalProducts,

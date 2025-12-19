@@ -219,6 +219,67 @@ export class UsersService {
     return user;
   }
 
+  public static async addToWishlist(userId: string, productId: string): Promise<IUser> {
+    const user = await User.findById(userId);
+    if (!user) {
+      throw new AppError(MESSAGES.USER_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
+    }
+
+    // Check if product already in wishlist
+    if (!(user as any).wishlist) {
+      (user as any).wishlist = [];
+    }
+
+    const wishlist = (user as any).wishlist as string[];
+    if (!wishlist.includes(productId)) {
+      wishlist.push(productId);
+      await user.save();
+    }
+
+    return user;
+  }
+
+  public static async removeFromWishlist(userId: string, productId: string): Promise<IUser> {
+    const user = await User.findById(userId);
+    if (!user) {
+      throw new AppError(MESSAGES.USER_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
+    }
+
+    if ((user as any).wishlist) {
+      (user as any).wishlist = (user as any).wishlist.filter(
+        (id: string) => id.toString() !== productId
+      );
+      await user.save();
+    }
+
+    return user;
+  }
+
+  public static async getWishlist(userId: string) {
+    const user = await User.findById(userId).populate({
+      path: 'wishlist',
+      select: 'name slug price images rating reviewCount stock isActive',
+    });
+
+    if (!user) {
+      throw new AppError(MESSAGES.USER_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
+    }
+
+    return (user as any).wishlist || [];
+  }
+
+  public static async clearWishlist(userId: string): Promise<IUser> {
+    const user = await User.findById(userId);
+    if (!user) {
+      throw new AppError(MESSAGES.USER_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
+    }
+
+    (user as any).wishlist = [];
+    await user.save();
+
+    return user;
+  }
+
   public static async getUserStats() {
     const [totalUsers, activeUsers, adminUsers, staffUsers, regularUsers] = await Promise.all([
       User.countDocuments(),
