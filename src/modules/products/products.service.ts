@@ -52,7 +52,7 @@ export class ProductsService {
 
     // Build query
     const query: any = { isActive: true };
-    
+
     if (search) {
       query.$text = { $search: search };
     }
@@ -94,7 +94,7 @@ export class ProductsService {
     const product = await Product.findById(productId)
       .populate('category', 'name slug')
       .populate('subcategories', 'name slug');
-    
+
     if (!product) {
       throw new AppError(MESSAGES.PRODUCT_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
     }
@@ -110,7 +110,7 @@ export class ProductsService {
     const product = await Product.findOne({ slug, isActive: true })
       .populate('category', 'name slug')
       .populate('subcategories', 'name slug');
-    
+
     if (!product) {
       throw new AppError(MESSAGES.PRODUCT_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
     }
@@ -129,8 +129,14 @@ export class ProductsService {
       throw new AppError(MESSAGES.CATEGORY_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
     }
 
-    // Check if SKU already exists
-    const existingProduct = await Product.findOne({ sku: data.sku });
+    // Check if SKU already exists anywhere (root or variants)
+    const existingProduct = await Product.findOne({
+      $or: [
+        { sku: data.sku },
+        { 'variants.sku': data.sku }
+      ]
+    });
+
     if (existingProduct) {
       throw new AppError('Product with this SKU already exists', HTTP_STATUS.CONFLICT);
     }
@@ -191,9 +197,9 @@ export class ProductsService {
   }
 
   public static async getFeaturedProducts(limit: number = 10) {
-    const products = await Product.find({ 
-      isActive: true, 
-      isFeatured: true 
+    const products = await Product.find({
+      isActive: true,
+      isFeatured: true
     })
       .populate('category', 'name slug')
       .sort({ salesCount: -1, createdAt: -1 })

@@ -83,6 +83,7 @@ const variantSchema = new Schema<IProductVariant>({
     required: true,
     unique: true,
     trim: true,
+    sparse: true,
   },
   price: {
     type: Number,
