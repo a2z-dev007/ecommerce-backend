@@ -20,7 +20,7 @@ export class UsersController {
     };
 
     const result = await UsersService.getUsers(pagination, filters);
-    
+
     res.status(HTTP_STATUS.OK).json(
       ResponseUtils.success(MESSAGES.FETCHED_SUCCESS, result.users, result.pagination)
     );
@@ -28,23 +28,28 @@ export class UsersController {
 
   public static getUserById = asyncHandler(async (req: Request, res: Response) => {
     const user = await UsersService.getUserById(req.params.id);
-    
+
     res.status(HTTP_STATUS.OK).json(
       ResponseUtils.success(MESSAGES.FETCHED_SUCCESS, user)
     );
   });
 
   public static createUser = asyncHandler(async (req: Request, res: Response) => {
-    const user = await UsersService.createUser(req.body);
-    
-    res.status(HTTP_STATUS.CREATED).json(
-      ResponseUtils.success(MESSAGES.CREATED_SUCCESS, user)
-    );
+    try {
+      const user = await UsersService.createUser(req.body, req.file);
+
+      res.status(HTTP_STATUS.CREATED).json(
+        ResponseUtils.success(MESSAGES.CREATED_SUCCESS, user)
+      );
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
   });
 
   public static updateUser = asyncHandler(async (req: Request, res: Response) => {
-    const user = await UsersService.updateUser(req.params.id, req.body);
-    
+    const user = await UsersService.updateUser(req.params.id, req.body, req.file);
+
     res.status(HTTP_STATUS.OK).json(
       ResponseUtils.success(MESSAGES.UPDATED_SUCCESS, user)
     );
@@ -52,7 +57,7 @@ export class UsersController {
 
   public static deleteUser = asyncHandler(async (req: Request, res: Response) => {
     await UsersService.deleteUser(req.params.id);
-    
+
     res.status(HTTP_STATUS.OK).json(
       ResponseUtils.success(MESSAGES.DELETED_SUCCESS)
     );
@@ -60,7 +65,7 @@ export class UsersController {
 
   public static updateProfile = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const user = await UsersService.updateProfile(req.user!.userId, req.body);
-    
+
     res.status(HTTP_STATUS.OK).json(
       ResponseUtils.success(MESSAGES.UPDATED_SUCCESS, user)
     );
@@ -68,7 +73,7 @@ export class UsersController {
 
   public static addAddress = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const user = await UsersService.addAddress(req.user!.userId, req.body);
-    
+
     res.status(HTTP_STATUS.CREATED).json(
       ResponseUtils.success('Address added successfully', user)
     );
@@ -80,7 +85,7 @@ export class UsersController {
       req.params.addressId,
       req.body
     );
-    
+
     res.status(HTTP_STATUS.OK).json(
       ResponseUtils.success('Address updated successfully', user)
     );
@@ -88,7 +93,7 @@ export class UsersController {
 
   public static deleteAddress = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const user = await UsersService.deleteAddress(req.user!.userId, req.params.addressId);
-    
+
     res.status(HTTP_STATUS.OK).json(
       ResponseUtils.success('Address deleted successfully', user)
     );
@@ -96,7 +101,7 @@ export class UsersController {
 
   public static getUserStats = asyncHandler(async (req: Request, res: Response) => {
     const stats = await UsersService.getUserStats();
-    
+
     res.status(HTTP_STATUS.OK).json(
       ResponseUtils.success('User statistics fetched successfully', stats)
     );
@@ -105,7 +110,7 @@ export class UsersController {
   public static addToWishlist = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const { productId } = req.body;
     const user = await UsersService.addToWishlist(req.user!.userId, productId);
-    
+
     res.status(HTTP_STATUS.OK).json(
       ResponseUtils.success('Product added to wishlist', user)
     );
@@ -114,7 +119,7 @@ export class UsersController {
   public static removeFromWishlist = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const { productId } = req.params;
     const user = await UsersService.removeFromWishlist(req.user!.userId, productId);
-    
+
     res.status(HTTP_STATUS.OK).json(
       ResponseUtils.success('Product removed from wishlist', user)
     );
@@ -122,7 +127,7 @@ export class UsersController {
 
   public static getWishlist = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const wishlist = await UsersService.getWishlist(req.user!.userId);
-    
+
     res.status(HTTP_STATUS.OK).json(
       ResponseUtils.success(MESSAGES.FETCHED_SUCCESS, wishlist)
     );
@@ -130,7 +135,7 @@ export class UsersController {
 
   public static clearWishlist = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const user = await UsersService.clearWishlist(req.user!.userId);
-    
+
     res.status(HTTP_STATUS.OK).json(
       ResponseUtils.success('Wishlist cleared', user)
     );

@@ -10,6 +10,7 @@ export interface CreateUserData {
   email: string;
   password: string;
   phone?: string;
+  avatar?: string;
   role: UserRole;
 }
 
@@ -44,7 +45,7 @@ export class UsersService {
 
     // Build query
     const query: any = {};
-    
+
     if (search) {
       query.$or = [
         { firstName: { $regex: search, $options: 'i' } },
@@ -86,30 +87,44 @@ export class UsersService {
     return user;
   }
 
-  public static async createUser(data: CreateUserData): Promise<IUser> {
-    // Check if user already exists
-    const existingUser = await User.findOne({ email: data.email });
-    if (existingUser) {
-      throw new AppError(MESSAGES.USER_EXISTS, HTTP_STATUS.CONFLICT);
+  public static async createUser(data: CreateUserData, file: Express.Multer.File): Promise<IUser> {
+    try {
+      // Check if user already exists
+      const existingUser = await User.findOne({ email: data.email });
+      if (existingUser) {
+        throw new AppError(MESSAGES.USER_EXISTS, HTTP_STATUS.CONFLICT);
+      }
+
+      // Hash password
+      const hashedPassword = await PasswordUtils.hash(data.password);
+
+      // Create user
+      const user = new User({
+        ...data,
+        password: hashedPassword,
+      });
+
+      if (file) {
+        user.avatar = `/uploads/${file.filename}`;
+      }
+
+      await user.save();
+      return user;
+    } catch (error) {
+      throw error;
     }
-
-    // Hash password
-    const hashedPassword = await PasswordUtils.hash(data.password);
-
-    // Create user
-    const user = new User({
-      ...data,
-      password: hashedPassword,
-    });
-
-    await user.save();
-    return user;
   }
 
-  public static async updateUser(userId: string, data: UpdateUserData): Promise<IUser> {
+  public static async updateUser(userId: string, data: UpdateUserData, file: Express.Multer.File): Promise<IUser> {
+    const updateData: any = { ...data };
+
+    if (file) {
+      updateData.avatar = `/uploads/${file.filename}`;
+    }
+
     const user = await User.findByIdAndUpdate(
       userId,
-      { $set: data },
+      { $set: updateData },
       { new: true, runValidators: true }
     );
 

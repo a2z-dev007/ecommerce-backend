@@ -23,6 +23,7 @@ export const createUserSchema = z.object({
       ),
     phone: z.string().optional(),
     role: z.enum([UserRole.ADMIN, UserRole.STAFF, UserRole.USER]),
+    avatar: z.string().optional(),
   }),
 });
 

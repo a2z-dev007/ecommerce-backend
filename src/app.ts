@@ -50,6 +50,9 @@ if (isDevelopment) {
 // API routes
 app.use('/api/v1', v1Routes);
 
+// Static files
+app.use('/uploads', express.static('uploads'));
+
 // Root endpoint
 app.get('/', (req, res) => {
   res.json({

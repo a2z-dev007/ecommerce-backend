@@ -1,10 +1,11 @@
 import mongoose from 'mongoose';
-import { env } from './env';
+import { env, isDevelopment } from './env';
+import { MongoMemoryServer } from 'mongodb-memory-server';
 
 class Database {
   private static instance: Database;
 
-  private constructor() {}
+  private constructor() { }
 
   public static getInstance(): Database {
     if (!Database.instance) {
@@ -17,15 +18,31 @@ class Database {
     try {
       const options = {
         maxPoolSize: 10,
-        serverSelectionTimeoutMS: 5000,
+        serverSelectionTimeoutMS: 2000,
         socketTimeoutMS: 45000,
         bufferCommands: false,
       };
 
-      await mongoose.connect(env.MONGODB_URI, options);
-      
+      let uri = env.MONGODB_URI;
+
+      if (isDevelopment) {
+        try {
+          // Try to connect to the configured URI first
+          console.log('📡 Attempting to connect to MongoDB...');
+          await mongoose.connect(uri, options);
+        } catch (error) {
+          console.warn('⚠️ Could not connect to local MongoDB. Starting MongoDB Memory Server...');
+          const mongod = await MongoMemoryServer.create();
+          uri = mongod.getUri();
+          console.log('🚀 Using In-Memory MongoDB:', uri);
+          await mongoose.connect(uri, options);
+        }
+      } else {
+        await mongoose.connect(uri, options);
+      }
+
       console.log('✅ Connected to MongoDB successfully');
-      
+
       // Handle connection events
       mongoose.connection.on('error', (error) => {
         console.error('❌ MongoDB connection error:', error);
