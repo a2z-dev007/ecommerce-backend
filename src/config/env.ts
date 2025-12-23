@@ -18,6 +18,9 @@ const envSchema = z.object({
   RATE_LIMIT_MAX_REQUESTS: z.string().transform(Number).default('100'),
   BCRYPT_SALT_ROUNDS: z.string().transform(Number).default('12'),
   COOKIE_SECRET: z.string().min(16, 'Cookie secret must be at least 16 characters'),
+  CLOUDINARY_CLOUD_NAME: z.string().min(1, 'Cloudinary Cloud Name is required'),
+  CLOUDINARY_API_KEY: z.string().min(1, 'Cloudinary API Key is required'),
+  CLOUDINARY_API_SECRET: z.string().min(1, 'Cloudinary API Secret is required'),
 });
 
 const parseEnv = () => {

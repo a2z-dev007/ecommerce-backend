@@ -3,7 +3,8 @@ import { AppError } from '../../common/middlewares/error.middleware';
 import { HTTP_STATUS, MESSAGES } from '../../common/constants';
 import { PaginationUtils, SlugUtils } from '../../common/utils';
 import { PaginationQuery, FilterQuery } from '../../common/types';
-
+import getDataUrl from '../../common/utils/bufferGenerator';
+import cloudinary from 'cloudinary';
 export interface CreateProductData {
   name: string;
   slug?: string;
@@ -152,15 +153,30 @@ export class ProductsService {
       slug,
     });
 
-    if (files) {
-      product.images = files?.map((file: any) => file?.path);
+    // Upload images to Cloudinary
+    const cloudinaryImages: string[] = [];
+
+    if (files && Array.isArray(files) && files.length > 0) {
+      for (const file of files) {
+        const imgBuffer = getDataUrl(file);
+
+        const uploadCloud = await cloudinary.v2.uploader.upload(imgBuffer.content!, {
+          folder: 'products',
+          resource_type: 'image',
+        });
+
+        cloudinaryImages.push(uploadCloud.secure_url);
+      }
+
+      console.log('✓ Uploaded', cloudinaryImages.length, 'images to Cloudinary');
+      product.images = cloudinaryImages;
     }
 
     await product.save();
     return product;
   }
 
-  public static async updateProduct(productId: string, data: Partial<CreateProductData>): Promise<IProduct> {
+  public static async updateProduct(productId: string, data: Partial<CreateProductData>, files?: any): Promise<IProduct> {
     // If updating name, regenerate slug
     if (data.name) {
       const existingSlugs = await Product.find({ _id: { $ne: productId } }, 'slug').lean();
@@ -174,6 +190,26 @@ export class ProductsService {
       if (!category) {
         throw new AppError(MESSAGES.CATEGORY_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
       }
+    }
+
+
+    // Upload images to Cloudinary
+    if (files && Array.isArray(files) && files.length > 0) {
+      const cloudinaryImages: string[] = [];
+
+      for (const file of files) {
+        const imgBuffer = getDataUrl(file);
+
+        const uploadCloud = await cloudinary.v2.uploader.upload(imgBuffer.content!, {
+          folder: 'products',
+          resource_type: 'image',
+        });
+
+        cloudinaryImages.push(uploadCloud.secure_url);
+      }
+
+      console.log('✓ Uploaded', cloudinaryImages.length, 'images to Cloudinary');
+      (data as any).images = cloudinaryImages;
     }
 
     const product = await Product.findByIdAndUpdate(

@@ -44,8 +44,12 @@ export class ProductsController {
   });
 
   public static createProduct = asyncHandler(async (req: Request, res: Response) => {
-    console.log(req.files);
-    console.log(req.body);
+    console.log('--- Create Product Request ---');
+    console.log('Body:', JSON.stringify(req.body, null, 2));
+    console.log('Files:', req.files ? (Array.isArray(req.files) ? `Array[${req.files.length}]` : 'Not an array') : 'Undefined');
+    if (Array.isArray(req.files)) {
+      req.files.forEach((f: any, i) => console.log(` File ${i}:`, f.originalname, f.path));
+    }
 
     const product = await ProductsService.createProduct(req.body, req.files);
 
@@ -55,7 +59,10 @@ export class ProductsController {
   });
 
   public static updateProduct = asyncHandler(async (req: Request, res: Response) => {
-    const product = await ProductsService.updateProduct(req.params.id, req.body);
+    console.log('--- Update Product Request ---');
+    console.log('ID:', req.params.id);
+    console.log('Files:', req.files ? (Array.isArray(req.files) ? `Array[${req.files.length}]` : 'Not an array') : 'Undefined');
+    const product = await ProductsService.updateProduct(req.params.id, req.body, req.files);
 
     res.status(HTTP_STATUS.OK).json(
       ResponseUtils.success(MESSAGES.UPDATED_SUCCESS, product)
