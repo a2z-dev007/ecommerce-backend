@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 const storage = multer.diskStorage({
     destination(req, file, cb) {
-        cb(null, 'uploads')
+        cb(null, 'uploads/products')
     },
     filename(req, file, cb) {
         const id = uuidv4()
@@ -13,4 +13,4 @@ const storage = multer.diskStorage({
     }
 })
 
-export const uploadFile = multer({ storage }).single('file')
+export const uploadMultipleFiles = multer({ storage }).array('files', 10)

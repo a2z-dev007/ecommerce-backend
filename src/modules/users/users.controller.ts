@@ -4,6 +4,7 @@ import { ResponseUtils } from '../../common/utils';
 import { HTTP_STATUS, MESSAGES } from '../../common/constants';
 import { AuthenticatedRequest } from '../../common/types';
 import { asyncHandler } from '../../common/middlewares/error.middleware';
+import { User } from '@/database';
 
 export class UsersController {
   public static getUsers = asyncHandler(async (req: Request, res: Response) => {

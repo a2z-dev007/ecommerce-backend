@@ -18,7 +18,7 @@ class Database {
     try {
       const options = {
         maxPoolSize: 10,
-        serverSelectionTimeoutMS: 2000,
+        serverSelectionTimeoutMS: 5000,
         socketTimeoutMS: 45000,
         bufferCommands: false,
       };
@@ -31,11 +31,12 @@ class Database {
           console.log('📡 Attempting to connect to MongoDB...');
           await mongoose.connect(uri, options);
         } catch (error) {
-          console.warn('⚠️ Could not connect to local MongoDB. Starting MongoDB Memory Server...');
-          const mongod = await MongoMemoryServer.create();
-          uri = mongod.getUri();
-          console.log('🚀 Using In-Memory MongoDB:', uri);
-          await mongoose.connect(uri, options);
+          // console.warn('⚠️ Could not connect to local MongoDB. Starting MongoDB Memory Server...');
+          // const mongod = await MongoMemoryServer.create();
+          // uri = mongod.getUri();
+          // console.log('🚀 Using In-Memory MongoDB:', uri);
+          // await mongoose.connect(uri, options);
+
         }
       } else {
         await mongoose.connect(uri, options);

@@ -21,7 +21,7 @@ export class ProductsController {
     };
 
     const result = await ProductsService.getProducts(pagination, filters);
-    
+
     res.status(HTTP_STATUS.OK).json(
       ResponseUtils.success(MESSAGES.FETCHED_SUCCESS, result.products, result.pagination)
     );
@@ -29,7 +29,7 @@ export class ProductsController {
 
   public static getProductById = asyncHandler(async (req: Request, res: Response) => {
     const product = await ProductsService.getProductById(req.params.id);
-    
+
     res.status(HTTP_STATUS.OK).json(
       ResponseUtils.success(MESSAGES.FETCHED_SUCCESS, product)
     );
@@ -37,15 +37,18 @@ export class ProductsController {
 
   public static getProductBySlug = asyncHandler(async (req: Request, res: Response) => {
     const product = await ProductsService.getProductBySlug(req.params.slug);
-    
+
     res.status(HTTP_STATUS.OK).json(
       ResponseUtils.success(MESSAGES.FETCHED_SUCCESS, product)
     );
   });
 
   public static createProduct = asyncHandler(async (req: Request, res: Response) => {
-    const product = await ProductsService.createProduct(req.body);
-    
+    console.log(req.files);
+    console.log(req.body);
+
+    const product = await ProductsService.createProduct(req.body, req.files);
+
     res.status(HTTP_STATUS.CREATED).json(
       ResponseUtils.success(MESSAGES.CREATED_SUCCESS, product)
     );
@@ -53,7 +56,7 @@ export class ProductsController {
 
   public static updateProduct = asyncHandler(async (req: Request, res: Response) => {
     const product = await ProductsService.updateProduct(req.params.id, req.body);
-    
+
     res.status(HTTP_STATUS.OK).json(
       ResponseUtils.success(MESSAGES.UPDATED_SUCCESS, product)
     );
@@ -61,7 +64,7 @@ export class ProductsController {
 
   public static deleteProduct = asyncHandler(async (req: Request, res: Response) => {
     await ProductsService.deleteProduct(req.params.id);
-    
+
     res.status(HTTP_STATUS.OK).json(
       ResponseUtils.success(MESSAGES.DELETED_SUCCESS)
     );
@@ -70,7 +73,7 @@ export class ProductsController {
   public static getFeaturedProducts = asyncHandler(async (req: Request, res: Response) => {
     const limit = parseInt(req.query.limit as string) || 10;
     const products = await ProductsService.getFeaturedProducts(limit);
-    
+
     res.status(HTTP_STATUS.OK).json(
       ResponseUtils.success('Featured products fetched successfully', products)
     );
@@ -79,7 +82,7 @@ export class ProductsController {
   public static getRelatedProducts = asyncHandler(async (req: Request, res: Response) => {
     const limit = parseInt(req.query.limit as string) || 6;
     const products = await ProductsService.getRelatedProducts(req.params.id, limit);
-    
+
     res.status(HTTP_STATUS.OK).json(
       ResponseUtils.success('Related products fetched successfully', products)
     );
@@ -87,7 +90,7 @@ export class ProductsController {
 
   public static getProductStats = asyncHandler(async (req: Request, res: Response) => {
     const stats = await ProductsService.getProductStats();
-    
+
     res.status(HTTP_STATUS.OK).json(
       ResponseUtils.success('Product statistics fetched successfully', stats)
     );
@@ -96,7 +99,7 @@ export class ProductsController {
   public static bulkUpdateProducts = asyncHandler(async (req: Request, res: Response) => {
     const { productIds, updateData } = req.body;
     const count = await ProductsService.bulkUpdateProducts(productIds, updateData);
-    
+
     res.status(HTTP_STATUS.OK).json(
       ResponseUtils.success(`${count} products updated successfully`, { count })
     );
@@ -105,7 +108,7 @@ export class ProductsController {
   public static bulkDeleteProducts = asyncHandler(async (req: Request, res: Response) => {
     const { productIds } = req.body;
     const count = await ProductsService.bulkDeleteProducts(productIds);
-    
+
     res.status(HTTP_STATUS.OK).json(
       ResponseUtils.success(`${count} products deleted successfully`, { count })
     );

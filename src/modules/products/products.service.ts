@@ -122,7 +122,7 @@ export class ProductsService {
     return product;
   }
 
-  public static async createProduct(data: CreateProductData): Promise<IProduct> {
+  public static async createProduct(data: CreateProductData, files: any): Promise<IProduct> {
     // Verify category exists
     const category = await Category.findById(data.category);
     if (!category) {
@@ -151,6 +151,10 @@ export class ProductsService {
       ...data,
       slug,
     });
+
+    if (files) {
+      product.images = files?.map((file: any) => file?.path);
+    }
 
     await product.save();
     return product;

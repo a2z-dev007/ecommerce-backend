@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { ProductsController } from './products.controller';
 import { authenticate, optionalAuth } from '../../common/middlewares/auth.middleware';
 import { requireAdminOrStaff } from '../../common/middlewares/role.middleware';
+import { uploadMultipleFiles } from '../../multer/multipleUploads';
 
 const router = Router();
 
@@ -14,7 +15,7 @@ router.get('/:id/related', ProductsController.getRelatedProducts);
 
 // Admin/Staff routes
 router.get('/admin/stats', authenticate, requireAdminOrStaff, ProductsController.getProductStats);
-router.post('/', authenticate, requireAdminOrStaff, ProductsController.createProduct);
+router.post('/', authenticate, uploadMultipleFiles, requireAdminOrStaff, ProductsController.createProduct);
 router.put('/:id', authenticate, requireAdminOrStaff, ProductsController.updateProduct);
 router.delete('/:id', authenticate, requireAdminOrStaff, ProductsController.deleteProduct);
 router.put('/bulk/update', authenticate, requireAdminOrStaff, ProductsController.bulkUpdateProducts);
