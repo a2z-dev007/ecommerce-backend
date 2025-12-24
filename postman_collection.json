@@ -9,7 +9,7 @@
   "variable": [
     {
       "key": "baseUrl",
-      "value": "http://localhost:8000/api/v1"
+      "value": "https://ecommerce-backend-nm1g.onrender.com/api/v1"
     },
     {
       "key": "accessToken",
