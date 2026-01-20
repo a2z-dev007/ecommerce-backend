@@ -11,6 +11,9 @@ import { reviewsRoutes } from '../modules/reviews/reviews.routes';
 import { paymentsRoutes } from '../modules/payments/payments.routes';
 import { inventoryRoutes } from '../modules/inventory/inventory.routes';
 import { cmsRoutes } from '../modules/cms/cms.routes';
+import { faqsRoutes } from '../modules/faqs/faqs.routes';
+import { testimonialsRoutes } from '../modules/testimonials/testimonials.routes';
+import { newsletterRoutes } from '../modules/newsletter/newsletter.routes';
 
 const router = Router();
 
@@ -27,6 +30,9 @@ router.use('/reviews', reviewsRoutes);
 router.use('/payments', paymentsRoutes);
 router.use('/inventory', inventoryRoutes);
 router.use('/cms', cmsRoutes);
+router.use('/faqs', faqsRoutes);
+router.use('/testimonials', testimonialsRoutes);
+router.use('/newsletter', newsletterRoutes);
 
 // Health check
 router.get('/health', (req, res) => {

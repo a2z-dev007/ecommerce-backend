@@ -68,6 +68,10 @@ export interface IProduct extends Document {
   };
   salesCount: number;
   viewCount: number;
+  specifications: {
+    name: string;
+    value: string;
+  }[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -280,6 +284,10 @@ const productSchema = new Schema<IProduct>({
     default: 0,
     min: 0,
   },
+  specifications: [{
+    name: { type: String, required: true },
+    value: { type: String, required: true }
+  }],
 }, {
   timestamps: true,
 });
