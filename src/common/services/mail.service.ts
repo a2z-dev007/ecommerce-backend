@@ -1,5 +1,6 @@
 
 import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 import { AppError } from '../middlewares/error.middleware';
 import { HTTP_STATUS } from '../constants';
 
@@ -13,6 +14,8 @@ export class MailService {
       pass: process.env.SMTP_PASS || 'ethereal_pass',
     },
   });
+
+  private static resend = new Resend(process.env.RESEND_API_KEY);
 
   public static async sendEmail(to: string, subject: string, html: string): Promise<void> {
     try {
@@ -37,6 +40,26 @@ export class MailService {
     }
   }
 
+  public static async sendEmailWithResend(to: string, subject: string, html: string): Promise<void> {
+    try {
+      const data = await this.resend.emails.send({
+        from: 'Ecommerce Platform <onboarding@resend.dev>', // Default for testing
+        to: [to],
+        subject: subject,
+        html: html,
+      });
+      
+      if (data.error) {
+        console.error('[MailService] Resend API Error:', data.error);
+        return;
+      }
+
+      console.log('[MailService] Email sent with Resend:', data);
+    } catch (error) {
+      console.error('[MailService] Error sending email with Resend:', error);
+    }
+  }
+
   public static async sendResetPasswordEmail(to: string, resetUrl: string): Promise<void> {
     const subject = 'Password Reset Request';
     const html = `
@@ -49,6 +72,11 @@ export class MailService {
         <p>Or copy and paste this link: ${resetUrl}</p>
       </div>
     `;
-    await this.sendEmail(to, subject, html);
+    
+    if (process.env.RESEND_API_KEY) {
+        await this.sendEmailWithResend(to, subject, html);
+    } else {
+        await this.sendEmail(to, subject, html);
+    }
   }
 }
