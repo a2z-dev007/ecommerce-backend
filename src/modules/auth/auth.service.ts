@@ -45,7 +45,17 @@ export class AuthService {
       role: data.role || UserRole.USER,
     });
 
+    // Generate verification token
+    const verificationToken = crypto.randomBytes(32).toString('hex');
+    const hashedVerificationToken = crypto.createHash('sha256').update(verificationToken).digest('hex');
+    
+    user.emailVerificationToken = hashedVerificationToken;
+    user.isEmailVerified = false;
     await user.save();
+
+    // Send verification email
+    const verificationUrl = `${process.env.CORS_ORIGIN || 'http://localhost:3000'}/auth/verify-email?token=${verificationToken}`;
+    await MailService.sendVerificationEmail(user.email, verificationUrl);
 
     // Generate tokens
     const { accessToken, refreshToken } = JWTService.generateTokenPair({
@@ -255,6 +265,22 @@ export class AuthService {
 
     // Clear all refresh tokens (force re-login)
     user.refreshTokens = [];
+    await user.save();
+  }
+
+  public static async verifyEmail(token: string): Promise<void> {
+    const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+
+    const user = await User.findOne({
+      emailVerificationToken: hashedToken,
+    });
+
+    if (!user) {
+      throw new AppError('Invalid or unavailable verification token', HTTP_STATUS.BAD_REQUEST);
+    }
+
+    user.isEmailVerified = true;
+    user.emailVerificationToken = undefined;
     await user.save();
   }
 }

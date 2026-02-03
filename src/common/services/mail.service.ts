@@ -79,4 +79,23 @@ export class MailService {
         await this.sendEmail(to, subject, html);
     }
   }
+
+  public static async sendVerificationEmail(to: string, verificationUrl: string): Promise<void> {
+    const subject = 'Verify your email address';
+    const html = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2>Verify your email</h2>
+        <p>Thank you for registering. Please click the button below to verify your email address:</p>
+        <a href="${verificationUrl}" style="background-color: #6B4A2D; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block; margin: 20px 0;">Verify Email</a>
+        <p>If you didn't create an account, you can safely ignore this email.</p>
+        <p>Or copy and paste this link: ${verificationUrl}</p>
+      </div>
+    `;
+
+    if (process.env.RESEND_API_KEY) {
+        await this.sendEmailWithResend(to, subject, html);
+    } else {
+        await this.sendEmail(to, subject, html);
+    }
+  }
 }

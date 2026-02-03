@@ -20,6 +20,7 @@ router.post('/login', authRateLimit, validateSchema(loginSchema), AuthController
 router.post('/refresh-token', validateSchema(refreshTokenSchema), AuthController.refreshToken);
 router.post('/forgot-password', authRateLimit, validateSchema(forgotPasswordSchema), AuthController.forgotPassword);
 router.post('/reset-password', authRateLimit, validateSchema(resetPasswordSchema), AuthController.resetPassword);
+router.post('/verify-email', authRateLimit, AuthController.verifyEmail);
 
 // Protected routes
 router.post('/logout', authenticate, AuthController.logout);
