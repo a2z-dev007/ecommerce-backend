@@ -80,4 +80,13 @@ export class AuthController {
       ResponseUtils.success('Profile fetched successfully', req.user)
     );
   });
+
+  public static verifyEmail = asyncHandler(async (req: Request, res: Response) => {
+    const { token } = req.body;
+    await AuthService.verifyEmail(token);
+    
+    res.status(HTTP_STATUS.OK).json(
+      ResponseUtils.success('Email verified successfully')
+    );
+  });
 }

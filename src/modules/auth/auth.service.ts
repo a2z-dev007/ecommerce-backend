@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import { MailService } from '../../common/services/mail.service';
 import { User, IUser } from '../../database';
 import { JWTService } from '../../config/jwt';
 import { PasswordUtils } from '../../common/utils';
@@ -44,7 +45,17 @@ export class AuthService {
       role: data.role || UserRole.USER,
     });
 
+    // Generate verification token
+    const verificationToken = crypto.randomBytes(32).toString('hex');
+    const hashedVerificationToken = crypto.createHash('sha256').update(verificationToken).digest('hex');
+    
+    user.emailVerificationToken = hashedVerificationToken;
+    user.isEmailVerified = false;
     await user.save();
+
+    // Send verification email
+    const verificationUrl = `${process.env.CORS_ORIGIN || 'http://localhost:3000'}/auth/verify-email?token=${verificationToken}`;
+    await MailService.sendVerificationEmail(user.email, verificationUrl);
 
     // Generate tokens
     const { accessToken, refreshToken } = JWTService.generateTokenPair({
@@ -210,9 +221,12 @@ export class AuthService {
 
   public static async forgotPassword(email: string): Promise<string> {
     const user = await User.findOne({ email });
+    
+    // Always return the same message to prevent email enumeration
+    const message = 'If an account with that email exists, a password reset link has been sent.';
+
     if (!user) {
-      // Don't reveal if email exists or not
-      return 'If an account with that email exists, a password reset link has been sent.';
+      return message;
     }
 
     // Generate reset token
@@ -223,9 +237,11 @@ export class AuthService {
     user.passwordResetExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
     await user.save();
 
-    // TODO: Send email with reset token
-    // For now, return the token (in production, this should be sent via email)
-    return resetToken;
+    const resetUrl = `${process.env.CORS_ORIGIN || 'http://localhost:3000'}/auth/reset-password?token=${resetToken}`;
+    
+    await MailService.sendResetPasswordEmail(email, resetUrl);
+
+    return message;
   }
 
   public static async resetPassword(token: string, newPassword: string): Promise<void> {
@@ -249,6 +265,22 @@ export class AuthService {
 
     // Clear all refresh tokens (force re-login)
     user.refreshTokens = [];
+    await user.save();
+  }
+
+  public static async verifyEmail(token: string): Promise<void> {
+    const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+
+    const user = await User.findOne({
+      emailVerificationToken: hashedToken,
+    });
+
+    if (!user) {
+      throw new AppError('Invalid or unavailable verification token', HTTP_STATUS.BAD_REQUEST);
+    }
+
+    user.isEmailVerified = true;
+    user.emailVerificationToken = undefined;
     await user.save();
   }
 }
