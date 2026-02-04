@@ -31,12 +31,18 @@ class Database {
           console.log('📡 Attempting to connect to MongoDB...');
           await mongoose.connect(uri, options);
         } catch (error) {
-          // console.warn('⚠️ Could not connect to local MongoDB. Starting MongoDB Memory Server...');
-          // const mongod = await MongoMemoryServer.create();
-          // uri = mongod.getUri();
-          // console.log('🚀 Using In-Memory MongoDB:', uri);
-          // await mongoose.connect(uri, options);
-
+          console.error('❌ Failed to connect to MongoDB Atlas:', error);
+          console.warn('⚠️ Could not connect to remote MongoDB. Starting MongoDB Memory Server fallback...');
+          
+          try {
+            const mongod = await MongoMemoryServer.create();
+            uri = mongod.getUri();
+            console.log('🚀 Using In-Memory MongoDB Fallback:', uri);
+            await mongoose.connect(uri, options);
+          } catch (memoryError) {
+             console.error('❌ Failed to start Memory Server fallback:', memoryError);
+             throw error; 
+          }
         }
       } else {
         await mongoose.connect(uri, options);

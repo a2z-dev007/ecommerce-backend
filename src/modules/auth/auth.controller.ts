@@ -58,12 +58,18 @@ export class AuthController {
   });
 
   public static forgotPassword = asyncHandler(async (req: Request, res: Response) => {
-    const { email } = req.body;
-    const message = await AuthService.forgotPassword(email);
-    
-    res.status(HTTP_STATUS.OK).json(
-      ResponseUtils.success(message)
-    );
+    try {
+        const { email } = req.body;
+        console.log(`[AuthController] Forgot password request for: ${email}`);
+        const message = await AuthService.forgotPassword(email);
+        
+        res.status(HTTP_STATUS.OK).json(
+        ResponseUtils.success(message)
+        );
+    } catch (error) {
+        console.error('[AuthController] Error in forgotPassword:', error);
+        throw error; // Re-throw to be handled by global error handler
+    }
   });
 
   public static resetPassword = asyncHandler(async (req: Request, res: Response) => {

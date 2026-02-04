@@ -235,10 +235,13 @@ export class AuthService {
 
     user.passwordResetToken = hashedResetToken;
     user.passwordResetExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+    
     await user.save();
 
     const resetUrl = `${process.env.CORS_ORIGIN || 'http://localhost:3000'}/auth/reset-password?token=${resetToken}`;
     
+    // Send reset email
+    // The sendResetPasswordEmail method handles errors internally (logging them) so we don't crash here.
     await MailService.sendResetPasswordEmail(email, resetUrl);
 
     return message;
