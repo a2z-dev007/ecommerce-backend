@@ -30,18 +30,8 @@ export class ContactService {
       </div>
     `;
 
-    // Send using Resend (or fallback)
-    if (process.env.RESEND_API_KEY) {
-        // Send to admin email (defined in environment or default)
-        const adminEmail = process.env.CONTACT_EMAIL || process.env.FROM_EMAIL || 'support@kangpack.com';
-        await MailService.sendEmailWithResend(adminEmail, `New Contact from ${name}`, adminHtml);
-        
-        // Optional: Send auto-reply to user
-        // await MailService.sendEmailWithResend(email, "We received your message", "<p>Thanks for contacting us...</p>");
-    } else {
-         // Fallback to nodemailer if no Resend key (though logic is now inside MailService mostly)
-         const adminEmail = process.env.CONTACT_EMAIL || process.env.FROM_EMAIL || 'support@kangpack.com';
-         await MailService.sendEmail(adminEmail, `New Contact from ${name}`, adminHtml);
-    }
+    // Send using Nodemailer
+    const adminEmail = process.env.CONTACT_EMAIL || process.env.FROM_EMAIL || 'support@kangpack.com';
+    await MailService.sendEmail(adminEmail, `New Contact from ${name}`, adminHtml);
   }
 }
