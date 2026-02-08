@@ -15,7 +15,7 @@ export class MailService {
     },
   });
 
-  private static resend = new Resend(process.env.RESEND_API_KEY);
+
 
   public static async sendEmail(to: string, subject: string, html: string): Promise<void> {
     try {
