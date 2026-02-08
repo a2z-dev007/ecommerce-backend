@@ -1,8 +1,11 @@
-import { Order, IOrder, Cart, Product } from '../../database';
+import { Order, IOrder, Cart, Product, User } from '../../database';
 import { AppError } from '../../common/middlewares/error.middleware';
 import { HTTP_STATUS, MESSAGES } from '../../common/constants';
 import { PaginationUtils } from '../../common/utils';
-import { PaginationQuery, FilterQuery, OrderStatus, PaymentStatus } from '../../common/types';
+import { PaginationQuery, FilterQuery, OrderStatus, PaymentStatus, PaymentMethod } from '../../common/types';
+import { MailService } from '../../common/services/mail.service';
+import { RazorpayService } from '../../common/services/razorpay.service';
+import crypto from 'crypto';
 
 export interface CreateOrderData {
   email: string;
@@ -13,6 +16,8 @@ export interface CreateOrderData {
   paymentMethod: string;
   notes?: string;
   couponCode?: string;
+  createAccount?: boolean;
+  password?: string;
 }
 
 export class OrdersService {
@@ -101,10 +106,12 @@ export class OrdersService {
 
   public static async createOrder(
     data: CreateOrderData,
-    userId: string
+    userId?: string,
+    sessionId?: string
   ): Promise<IOrder> {
-    // Get user's cart
-    const cart = await Cart.findOne({ user: userId }).populate('items.product');
+    // Get cart by user or session
+    const query = userId ? { user: userId } : { sessionId };
+    const cart = await Cart.findOne(query).populate('items.product');
     
     if (!cart || cart.items.length === 0) {
       throw new AppError(MESSAGES.CART_EMPTY, HTTP_STATUS.BAD_REQUEST);
@@ -113,9 +120,9 @@ export class OrdersService {
     // Verify stock and prepare order items
     const orderItems = [];
     for (const item of cart.items) {
-      const product = await Product.findById(item.product);
+      const product = item.product as any;
       if (!product) {
-        throw new AppError(`Product ${item.product} not found`, HTTP_STATUS.NOT_FOUND);
+        throw new AppError(`Product not found`, HTTP_STATUS.NOT_FOUND);
       }
 
       if (product.trackQuantity && product.stock < item.quantity) {
@@ -154,10 +161,46 @@ export class OrdersService {
     const discountAmount = 0; // TODO: Apply coupon
     const totalAmount = subtotal + taxAmount + shippingAmount - discountAmount;
 
+    // Create account if requested
+    let finalUserId = userId;
+    if (!userId && data.createAccount && data.password) {
+      const existingUser = await User.findOne({ email: data.email });
+      if (existingUser) {
+        // Silently link if it matches, or handle conflict. 
+        // Requirements say "no duplicate form", implying we should use existing if possible, 
+        // but typically security-wise we shouldn't just link without password.
+        // For now, let's just abort account creation if email exists or tell user to login.
+        // Actually, the prompt says "If a guest later creates an account with the same email: Orders should be attachable"
+        // Let's just create the account if it doesn't exist.
+      } else {
+        const newUser = new User({
+          email: data.email,
+          password: data.password,
+          firstName: data.shippingAddress.firstName,
+          lastName: data.shippingAddress.lastName,
+          role: 'user',
+        });
+        
+        // Generate verification token for the new account
+        const verificationToken = crypto.randomBytes(32).toString('hex');
+        const hashedVerificationToken = crypto.createHash('sha256').update(verificationToken).digest('hex');
+        newUser.emailVerificationToken = hashedVerificationToken;
+        newUser.isEmailVerified = false;
+
+        await newUser.save();
+        finalUserId = newUser._id.toString();
+
+        // Send welcome email with credentials and verification link
+        const verificationUrl = `${process.env.CORS_ORIGIN || 'http://localhost:3000'}/auth/verify-email?token=${verificationToken}`;
+        MailService.sendAccountCreatedEmail(data.email, data.password!, verificationUrl).catch(err => console.error('Failed to send welcome email:', err));
+      }
+    }
+
     // Create order
     const order = new Order({
       orderNumber,
-      customer: userId,
+      customer: finalUserId,
+      sessionId: finalUserId ? undefined : sessionId,
       email: data.email,
       phone: data.phone,
       items: orderItems,
@@ -176,9 +219,73 @@ export class OrdersService {
 
     await order.save();
 
-    // Clear cart
-    cart.items = [];
-    await cart.save();
+    // Clear cart if not Razorpay (Razorpay cart clear happens after payment verification)
+    // Actually, usually we clear it now or on verification. 
+    // If we clear now, but payment fails, user has empty cart.
+    // If we don't clear now, user sees items in cart while paying.
+    // Standard practice: Clear after successful order creation if it's not a payment-mandatory flow, 
+    // OR keep it until payment success. 
+    // For this app, let's clear it on SUCCESSFUL creation for COD, and on VERIFICATION for Razorpay.
+    
+    if (data.paymentMethod === PaymentMethod.COD) {
+      cart.items = [];
+      await cart.save();
+    }
+
+    // Handle Razorpay Order Creation
+    if (data.paymentMethod === PaymentMethod.RAZORPAY) {
+      try {
+        const razorpayOrder = await RazorpayService.createOrder(order.totalAmount, order.orderNumber);
+        order.razorpayOrderId = razorpayOrder.id;
+        await order.save();
+      } catch (error) {
+        // If razorpay order creation fails, we might want to delete the order or mark it failed
+        order.status = OrderStatus.CANCELLED;
+        order.paymentStatus = PaymentStatus.FAILED;
+        await order.save();
+        throw new AppError('Failed to initialize payment gateway', HTTP_STATUS.INTERNAL_SERVER_ERROR);
+      }
+    }
+
+    // Send order confirmation email (don't await to avoid delaying response)
+    MailService.sendOrderConfirmationEmail(order).catch(err => console.error('Failed to send order confirmation email:', err));
+
+    return order;
+  }
+
+  public static async verifyRazorpayPayment(
+    orderId: string,
+    razorpayOrderId: string,
+    razorpayPaymentId: string,
+    razorpaySignature: string
+  ): Promise<IOrder> {
+    const isVerified = RazorpayService.verifySignature(
+      razorpayOrderId,
+      razorpayPaymentId,
+      razorpaySignature
+    );
+
+    if (!isVerified) {
+      throw new AppError('Invalid payment signature', HTTP_STATUS.BAD_REQUEST);
+    }
+
+    const order = await Order.findById(orderId);
+    if (!order) {
+      throw new AppError(MESSAGES.ORDER_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
+    }
+
+    order.paymentStatus = PaymentStatus.COMPLETED;
+    order.razorpayPaymentId = razorpayPaymentId;
+    order.razorpaySignature = razorpaySignature;
+    order.status = OrderStatus.CONFIRMED;
+    await order.save();
+
+    // Send payment received email
+    MailService.sendPaymentReceivedEmail(order).catch(err => console.error('Failed to send payment received email:', err));
+
+    // Clear cart now that payment is confirmed
+    const query = order.customer ? { user: order.customer } : { sessionId: order.sessionId };
+    await Cart.findOneAndUpdate(query, { $set: { items: [] } });
 
     return order;
   }
@@ -211,6 +318,12 @@ export class OrdersService {
     }
 
     await order.save();
+
+    // Send order status update email
+    if ([OrderStatus.SHIPPED, OrderStatus.CANCELLED, OrderStatus.DELIVERED].includes(status)) {
+      MailService.sendOrderStatusUpdateEmail(order, status).catch(err => console.error('Failed to send order status update email:', err));
+    }
+
     return order;
   }
 
@@ -341,7 +454,15 @@ export class OrdersService {
   }
 
   public static async getUserOrderHistory(userId: string, limit: number = 10) {
-    const orders = await Order.find({ customer: userId })
+    const user = await User.findById(userId);
+    if (!user) return [];
+
+    const orders = await Order.find({
+      $or: [
+        { customer: userId },
+        { email: user.email, customer: { $exists: false } }
+      ]
+    })
       .select('orderNumber status totalAmount createdAt items')
       .sort({ createdAt: -1 })
       .limit(limit)

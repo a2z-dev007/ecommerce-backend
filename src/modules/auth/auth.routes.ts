@@ -21,6 +21,7 @@ router.post('/refresh-token', validateSchema(refreshTokenSchema), AuthController
 router.post('/forgot-password', authRateLimit, validateSchema(forgotPasswordSchema), AuthController.forgotPassword);
 router.post('/reset-password', authRateLimit, validateSchema(resetPasswordSchema), AuthController.resetPassword);
 router.post('/verify-email', authRateLimit, AuthController.verifyEmail);
+router.post('/resend-verification', authRateLimit, AuthController.resendVerification);
 
 // Protected routes
 router.post('/logout', authenticate, AuthController.logout);

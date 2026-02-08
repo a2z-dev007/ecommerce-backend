@@ -28,7 +28,7 @@ export interface IShippingAddress {
 export interface IOrder extends Document {
   _id: Types.ObjectId;
   orderNumber: string;
-  customer: string;
+  customer?: string;
   email: string;
   phone?: string;
   items: IOrderItem[];
@@ -42,6 +42,10 @@ export interface IOrder extends Document {
   paymentStatus: PaymentStatus;
   paymentMethod?: PaymentMethod;
   paymentIntentId?: string;
+  razorpayOrderId?: string;
+  razorpayPaymentId?: string;
+  razorpaySignature?: string;
+  sessionId?: string;
   shippingAddress: IShippingAddress;
   billingAddress?: IShippingAddress;
   shippingMethod?: string;
@@ -151,7 +155,11 @@ const orderSchema = new Schema<IOrder>({
   customer: {
     type: Schema.Types.ObjectId as any,
     ref: 'User',
-    required: true,
+    required: false,
+  },
+  sessionId: {
+    type: String,
+    required: false,
   },
   email: {
     type: String,
@@ -191,7 +199,7 @@ const orderSchema = new Schema<IOrder>({
   },
   currency: {
     type: String,
-    default: 'USD',
+    default: 'INR',
     uppercase: true,
   },
   status: {
@@ -209,6 +217,9 @@ const orderSchema = new Schema<IOrder>({
     enum: Object.values(PaymentMethod),
   },
   paymentIntentId: String,
+  razorpayOrderId: String,
+  razorpayPaymentId: String,
+  razorpaySignature: String,
   shippingAddress: {
     type: shippingAddressSchema,
     required: true,
@@ -229,6 +240,14 @@ const orderSchema = new Schema<IOrder>({
   deliveredAt: Date,
 }, {
   timestamps: true,
+});
+
+// Ensure either customer or sessionId is provided
+orderSchema.pre('save', function (this: IOrder, next) {
+  if (!this.customer && !this.sessionId) {
+    return next(new Error('Either customer or sessionId must be provided'));
+  }
+  next();
 });
 
 // Indexes

@@ -24,6 +24,7 @@ export const MESSAGES = {
   PASSWORD_RESET_SUCCESS: 'Password reset successful',
   
   // Error messages
+  EMAIL_NOT_VERIFIED: 'Please verify your email address to log in. Check your inbox for the verification link.',
   INVALID_CREDENTIALS: 'Invalid email or password',
   UNAUTHORIZED: 'Unauthorized access',
   FORBIDDEN: 'Access forbidden',

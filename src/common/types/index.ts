@@ -72,7 +72,8 @@ export enum PaymentMethod {
   DEBIT_CARD = 'debit_card',
   PAYPAL = 'paypal',
   STRIPE = 'stripe',
-  CASH_ON_DELIVERY = 'cash_on_delivery',
+  RAZORPAY = 'razorpay',
+  COD = 'cod',
   BANK_TRANSFER = 'bank_transfer'
 }
 

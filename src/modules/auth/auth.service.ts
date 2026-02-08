@@ -97,6 +97,11 @@ export class AuthService {
       throw new AppError(MESSAGES.INVALID_CREDENTIALS, HTTP_STATUS.UNAUTHORIZED);
     }
 
+    // Check if email is verified
+    if (!user.isEmailVerified) {
+      throw new AppError(MESSAGES.EMAIL_NOT_VERIFIED, HTTP_STATUS.FORBIDDEN);
+    }
+
     // Generate tokens
     const { accessToken, refreshToken } = JWTService.generateTokenPair({
       userId: user._id.toString(),
@@ -285,5 +290,25 @@ export class AuthService {
     user.isEmailVerified = true;
     user.emailVerificationToken = undefined;
     await user.save();
+  }
+
+  public static async resendVerificationEmail(email: string): Promise<void> {
+    const user = await User.findOne({ email });
+    
+    // Silence error if user doesn't exist or is already verified for security
+    if (!user || user.isEmailVerified) {
+      return;
+    }
+
+    // Generate new verification token
+    const verificationToken = crypto.randomBytes(32).toString('hex');
+    const hashedVerificationToken = crypto.createHash('sha256').update(verificationToken).digest('hex');
+    
+    user.emailVerificationToken = hashedVerificationToken;
+    await user.save();
+
+    // Send verification email
+    const verificationUrl = `${process.env.CORS_ORIGIN || 'http://localhost:3000'}/auth/verify-email?token=${verificationToken}`;
+    await MailService.sendVerificationEmail(user.email, verificationUrl);
   }
 }

@@ -95,4 +95,13 @@ export class AuthController {
       ResponseUtils.success('Email verified successfully')
     );
   });
+
+  public static resendVerification = asyncHandler(async (req: Request, res: Response) => {
+    const { email } = req.body;
+    await AuthService.resendVerificationEmail(email);
+    
+    res.status(HTTP_STATUS.OK).json(
+      ResponseUtils.success('Verification email sent if account exists and is not already verified')
+    );
+  });
 }

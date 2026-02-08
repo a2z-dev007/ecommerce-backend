@@ -48,7 +48,10 @@ export class OrdersController {
   });
 
   public static createOrder = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const order = await OrdersService.createOrder(req.body, req.user!.userId);
+    const userId = req.user?.userId;
+    const sessionId = req.headers['x-session-id'] as string;
+
+    const order = await OrdersService.createOrder(req.body, userId, sessionId);
     
     res.status(HTTP_STATUS.CREATED).json(
       ResponseUtils.success('Order created successfully', order)
@@ -122,6 +125,20 @@ export class OrdersController {
     
     res.status(HTTP_STATUS.OK).json(
       ResponseUtils.success(MESSAGES.FETCHED_SUCCESS, orders)
+    );
+  });
+
+  public static verifyRazorpayPayment = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const { razorpayOrderId, razorpayPaymentId, razorpaySignature } = req.body;
+    const order = await OrdersService.verifyRazorpayPayment(
+      req.params.id,
+      razorpayOrderId,
+      razorpayPaymentId,
+      razorpaySignature
+    );
+    
+    res.status(HTTP_STATUS.OK).json(
+      ResponseUtils.success('Payment verified successfully', order)
     );
   });
 }
