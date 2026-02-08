@@ -48,7 +48,14 @@ class Database {
         await mongoose.connect(uri, options);
       }
 
+      const host = mongoose.connection.host;
+      const dbName = mongoose.connection.name;
+      const isLocal = host.includes('localhost') || host.includes('127.0.0.1');
+      
       console.log('✅ Connected to MongoDB successfully');
+      console.log('📊 Connection Details:');
+      console.log(`   - Host: ${host} (${isLocal ? 'Local' : 'Remote/Atlas'})`);
+      console.log(`   - Database: ${dbName}`);
 
       // Handle connection events
       mongoose.connection.on('error', (error) => {
