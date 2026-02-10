@@ -213,6 +213,7 @@ export class OrdersService {
       billingAddress: data.billingAddress || data.shippingAddress,
       shippingMethod: data.shippingMethod,
       paymentMethod: data.paymentMethod,
+      status: data.paymentMethod === PaymentMethod.COD ? OrderStatus.CONFIRMED : OrderStatus.PENDING,
       notes: data.notes,
       couponCode: data.couponCode,
     });

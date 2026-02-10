@@ -116,11 +116,21 @@ export class MailService {
     const subject = `Order Confirmed - ${order.orderNumber}`;
     const itemsHtml = order.items.map((item: any) => `
       <tr>
-        <td style="padding: 10px 0; border-bottom: 1px solid #efefef;">
-          ${item.name} x ${item.quantity}
+        <td style="padding: 15px 10px; border-bottom: 1px solid #efefef;">
+          <table cellpadding="0" cellspacing="0" border="0" width="100%">
+            <tr>
+              <td style="width: 80px; vertical-align: top;">
+                <img src="${item.image || 'https://via.placeholder.com/80'}" alt="${item.name}" style="width: 70px; height: 70px; object-fit: cover; border-radius: 8px; border: 1px solid #e0e0e0;" />
+              </td>
+              <td style="vertical-align: top; padding-left: 15px;">
+                <strong style="color: #3E2A1D; font-size: 14px;">${item.name}</strong><br>
+                <span style="color: #888; font-size: 12px;">Quantity: ${item.quantity}</span>
+              </td>
+            </tr>
+          </table>
         </td>
-        <td style="padding: 10px 0; border-bottom: 1px solid #efefef; text-align: right;">
-          INR ${item.price.toLocaleString()}
+        <td style="padding: 15px 10px; border-bottom: 1px solid #efefef; text-align: right; vertical-align: top;">
+          <strong style="color: #6B4A2D;">INR ${item.price.toLocaleString()}</strong>
         </td>
       </tr>
     `).join('');
@@ -177,6 +187,11 @@ export class MailService {
               ${order.shippingAddress.city}, ${order.shippingAddress.state} ${order.shippingAddress.postalCode}<br>
               ${order.shippingAddress.country}
             </p>
+          </div>
+
+          <div style="margin-top: 20px; padding: 20px; border-radius: 8px; border: 1px solid #e0e0e0; background-color: #ffffff;">
+            <p style="margin: 0; font-size: 14px;"><strong>Payment Method:</strong> ${order.paymentMethod === 'cod' ? 'Cash on Delivery' : 'Online Payment'}</p>
+            ${order.paymentMethod === 'cod' ? '<p style="margin: 5px 0 0; font-size: 13px; color: #6B4A2D;">Please have the exact amount ready in cash when your order arrives.</p>' : ''}
           </div>
 
           <div style="margin-top: 40px; text-align: center; font-size: 12px; color: #888;">

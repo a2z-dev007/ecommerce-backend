@@ -15,32 +15,86 @@ export interface CreateProductData {
   tags?: string[];
   brand?: string;
   sku: string;
+  
+  // Pricing & Discounts
   price: number;
   compareAtPrice?: number;
   cost?: number;
+  discountType?: 'percentage' | 'fixed' | 'none';
+  discountValue?: number;
+  discountStartDate?: Date;
+  discountEndDate?: Date;
+  
+  // Inventory
   stock: number;
   lowStockThreshold?: number;
   trackQuantity?: boolean;
   allowBackorder?: boolean;
+  backorderLimit?: number;
+  inventoryPolicy?: 'deny' | 'continue';
+  
+  // Physical Properties
   weight?: number;
+  weightUnit?: 'kg' | 'g' | 'lb' | 'oz';
   dimensions?: {
     length: number;
     width: number;
     height: number;
+    unit?: 'cm' | 'm' | 'in' | 'ft';
   };
+  
+  // Media
   images?: string[];
+  videos?: string[];
+  
+  // Variants & Attributes
   variants?: any[];
   attributes?: any[];
+  
+  // Status & Visibility
   isActive?: boolean;
   isFeatured?: boolean;
+  isNew?: boolean;
+  isBestseller?: boolean;
   isDigital?: boolean;
   requiresShipping?: boolean;
   taxable?: boolean;
+  taxClass?: string;
+  
+  // Product Condition
+  condition?: 'new' | 'refurbished' | 'used';
+  
+  // Shipping
+  freeShipping?: boolean;
+  shippingClass?: string;
+  
+  // SEO
   seo?: {
     metaTitle?: string;
     metaDescription?: string;
     metaKeywords?: string;
+    canonicalUrl?: string;
   };
+  
+  // Reviews
+  reviewsEnabled?: boolean;
+  
+  // Additional Info
+  specifications?: {
+    name: string;
+    value: string;
+  }[];
+  warranty?: string;
+  returnPolicy?: string;
+  
+  // Availability
+  availableFrom?: Date;
+  availableUntil?: Date;
+  
+  // Related Products
+  relatedProducts?: string[];
+  crossSellProducts?: string[];
+  upSellProducts?: string[];
 }
 
 export class ProductsService {
