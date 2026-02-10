@@ -101,7 +101,10 @@ export class ProductsService {
   public static async getProducts(
     pagination: PaginationQuery,
     filters: FilterQuery
-  ) {
+  ): Promise<{
+    products: any[];
+    pagination: any;
+  }> {
     const { page = 1, limit = 10, sort = 'createdAt', order = 'desc' } = pagination;
     const { search, category, minPrice, maxPrice } = filters;
 
@@ -290,7 +293,7 @@ export class ProductsService {
     await product.save();
   }
 
-  public static async getFeaturedProducts(limit: number = 10) {
+  public static async getFeaturedProducts(limit: number = 10): Promise<any[]> {
     const products = await Product.find({
       isActive: true,
       isFeatured: true
@@ -303,7 +306,7 @@ export class ProductsService {
     return products;
   }
 
-  public static async getRelatedProducts(productId: string, limit: number = 6) {
+  public static async getRelatedProducts(productId: string, limit: number = 6): Promise<any[]> {
     const product = await Product.findById(productId);
     if (!product) {
       throw new AppError(MESSAGES.PRODUCT_NOT_FOUND, HTTP_STATUS.NOT_FOUND);

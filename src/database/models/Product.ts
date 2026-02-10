@@ -75,7 +75,7 @@ export interface IProduct extends Document {
   // Product Status & Visibility
   isActive: boolean;
   isFeatured: boolean;
-  isNew?: boolean;
+  isNew: boolean;
   isBestseller?: boolean;
   isDigital: boolean;
   requiresShipping: boolean;
@@ -135,7 +135,7 @@ export interface IProduct extends Document {
   stockStatus?: 'in_stock' | 'low_stock' | 'out_of_stock' | 'on_backorder';
 }
 
-const variantSchema = new Schema<IProductVariant>({
+const variantSchema = new Schema({
   name: {
     type: String,
     required: true,
@@ -190,7 +190,7 @@ const variantSchema = new Schema<IProductVariant>({
   },
 }, { _id: true });
 
-const productSchema = new Schema<IProduct>({
+const productSchema = new Schema({
   name: {
     type: String,
     required: true,
