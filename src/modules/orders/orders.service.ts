@@ -27,7 +27,7 @@ export class OrdersService {
     userId?: string
   ) {
     const { page = 1, limit = 10, sort = 'createdAt', order = 'desc' } = pagination;
-    const { status, search, startDate, endDate } = filters;
+    const { status, search, startDate, endDate, paymentStatus, paymentMethod, minAmount, maxAmount } = filters;
 
     const query: any = {};
     
@@ -39,10 +39,21 @@ export class OrdersService {
       query.status = status;
     }
 
+    if (paymentStatus) {
+      query.paymentStatus = paymentStatus;
+    }
+
+    if (paymentMethod) {
+      query.paymentMethod = paymentMethod;
+    }
+
     if (search) {
       query.$or = [
         { orderNumber: { $regex: search, $options: 'i' } },
         { email: { $regex: search, $options: 'i' } },
+        { "shippingAddress.firstName": { $regex: search, $options: 'i' } },
+        { "shippingAddress.lastName": { $regex: search, $options: 'i' } },
+        { "items.name": { $regex: search, $options: 'i' } },
       ];
     }
 
@@ -50,6 +61,12 @@ export class OrdersService {
       query.createdAt = {};
       if (startDate) query.createdAt.$gte = new Date(startDate);
       if (endDate) query.createdAt.$lte = new Date(endDate);
+    }
+
+    if (minAmount || maxAmount) {
+      query.totalAmount = {};
+      if (minAmount) query.totalAmount.$gte = parseFloat(minAmount);
+      if (maxAmount) query.totalAmount.$lte = parseFloat(maxAmount);
     }
 
     const skip = PaginationUtils.getSkip(page, limit);

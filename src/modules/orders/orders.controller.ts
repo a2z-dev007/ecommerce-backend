@@ -19,6 +19,10 @@ export class OrdersController {
       search: req.query.search as string,
       startDate: req.query.startDate as string,
       endDate: req.query.endDate as string,
+      paymentStatus: req.query.paymentStatus as string,
+      paymentMethod: req.query.paymentMethod as string,
+      minAmount: req.query.minAmount as string,
+      maxAmount: req.query.maxAmount as string,
     };
 
     const userId = req.user?.role === 'user' ? req.user.userId : undefined;

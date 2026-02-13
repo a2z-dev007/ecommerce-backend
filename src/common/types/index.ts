@@ -40,6 +40,10 @@ export interface FilterQuery {
   maxPrice?: number;
   startDate?: string;
   endDate?: string;
+  paymentStatus?: string;
+  paymentMethod?: string;
+  minAmount?: string;
+  maxAmount?: string;
 }
 
 export enum UserRole {
